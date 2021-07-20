@@ -1,467 +1,473 @@
-# Use shift + alt + down arrow key in windows to copy the line below it
-# Hold alt and with mouse to use it as multiple cursor  
-import tkinter as tk
-from tkinter import ttk
-from tkinter import font,colorchooser,filedialog,messagebox
+from tkinter import *
+from tkinter import font,filedialog,messagebox,ttk
 import os
-from tkinter.constants import NONE, TRUE
-from typing import Counter
+from tkinter import colorchooser
 
-main_window=tk.Tk()
-main_window.geometry('1200x800') # this will set the default size of apllication window
-main_window.title('Kraber Text Editor')
-main_window.wm_iconbitmap('myicon.ico') # this is to give icon to your application
+root=Tk()
+root.title("Kraber Text Editor")
+root.iconbitmap("myicon.ico")
+root.geometry("1400x795")
+# root.minsize(width=1400,height=795)
+# root.maxsize(width=1400,height=795)
 
-# importing icons
-new_icon=tk.PhotoImage(file='icons2/new.png')
-open_icon=tk.PhotoImage(file='icons2/open.png')
-save_icon=tk.PhotoImage(file='icons2/save.png')
-save_as_icon=tk.PhotoImage(file='icons2/save_as.png')
-exit_icon=tk.PhotoImage(file='icons2/exit.png')
-cut_icon=tk.PhotoImage(file='icons2/cut.png')
-copy_icon=tk.PhotoImage(file='icons2/copy.png')
-paste_icon=tk.PhotoImage(file='icons2/paste.png')
-clear_all_icon=tk.PhotoImage(file='icons2/clear_all.png')
-find_icon=tk.PhotoImage(file='icons2/find.png')
-tool_bar_icon=tk.PhotoImage(file='icons2/tool_bar.png')
-status_bar_icon=tk.PhotoImage(file='icons2/status_bar.png')
-light_default_icon=tk.PhotoImage(file='icons2/light_default.png')
-light_icon=tk.PhotoImage(file='icons2/light_plus.png')
-dark_icon=tk.PhotoImage(file='icons2/dark.png')
-red_icon=tk.PhotoImage(file='icons2/red.png')
-night_blue_icon=tk.PhotoImage(file='icons2/night_blue.png')
-monokai_icon=tk.PhotoImage(file='icons2/monokai.png')
-bold_icon=tk.PhotoImage(file='icons2/bold.png')
-italic_icon=tk.PhotoImage(file='icons2/italic.png')
-underline_icon=tk.PhotoImage(file='icons2/underline.png')
-font_color_icon=tk.PhotoImage(file='icons2/font_color.png')
-align_left_icon=tk.PhotoImage(file='icons2/align_left.png')
-align_right_icon=tk.PhotoImage(file='icons2/align_right.png')
-align_center_icon=tk.PhotoImage(file='icons2/align_center.png')
-
-#------------------Start of MainMenu--------------------#
-
-main_menu=tk.Menu(main_window)
-
-### File 
-file=tk.Menu(main_menu,tearoff=0)
-
-### Edit
-edit=tk.Menu(main_menu,tearoff=0)
-
-### View
-view=tk.Menu(main_menu,tearoff=0)
-
-### Color Theme
-color_theme=tk.Menu(main_menu,tearoff=0)
-theme_choice=tk.StringVar()
-color_icons=(light_default_icon,light_icon,dark_icon,red_icon,night_blue_icon,monokai_icon)
-color_dict={
-    'Light(Default)':('#000000','#ffffff'), # (fg color,bg color)
-    'Light Plus':('#474747','#e0e0e0'),
-    'Dark':('#ffd700','#1a1a2e'),
-    'Red':('#2d2d2d','#ffe8e8'),
-    'Night Blue':('#ededed','#6b9dc2'),
-    'Monokai':('#474747','#d3b774')
-}
-
-# Cascade
-main_menu.add_cascade(label='File',menu=file)
-main_menu.add_cascade(label='Edit',menu=edit)
-main_menu.add_cascade(label='View',menu=view)
-main_menu.add_cascade(label='Color Theme',menu=color_theme)
-
-#------------------END of MainMenu----------------------#
-
-#------------------Start of ToolBar---------------------#
-
-tool_bar=ttk.Label(main_window)
-tool_bar.pack(side=tk.TOP,fill=tk.X) # this will place it on top and fill it completely horizontally!!
-print(tk.font.families()) # this will print all the available fonts in the computer!!
-print(type(tk.font.families())) # this will print 'tuple'
-
-### Font Box
-font_tuple=tk.font.families()
-font_family=tk.StringVar()
-font_box=ttk.Combobox(tool_bar,textvariable=font_family,width=35,state='readonly')
-font_box['values']=font_tuple
-font_box.current(font_tuple.index('Arial'))
-font_box.grid(row=0,column=0,padx=5)
-
-### Size Box
-size_var=tk.IntVar()
-size_box=ttk.Combobox(tool_bar,textvariable=size_var,width=5,state='readonly')
-size_box['value']=tuple(range(1,101))
-size_box.current(11)
-size_box.grid(row=0,column=1,padx=5)
-
-### Bold Button
-Bold_btn=ttk.Button(tool_bar,image=bold_icon,compound=tk.CENTER)
-Bold_btn.grid(row=0,column=3,padx=5)
-
-### Italic Button
-Italic_btn=ttk.Button(tool_bar,image=italic_icon,compound=tk.CENTER)
-Italic_btn.grid(row=0,column=4,padx=5)
-
-### Underline Button
-Underline_btn=ttk.Button(tool_bar,image=underline_icon,compound=tk.CENTER)
-Underline_btn.grid(row=0,column=5,padx=5)
-
-## Font Color Button
-Font_Color_btn=ttk.Button(tool_bar,image=font_color_icon,compound=tk.CENTER)
-Font_Color_btn.grid(row=0,column=6,padx=5)
-
-## Align Left Button
-Align_Left_btn=ttk.Button(tool_bar,image=align_left_icon,compound=tk.CENTER)
-Align_Left_btn.grid(row=0,column=7,padx=5)
-
-## Align Center Button
-Align_Center_btn=ttk.Button(tool_bar,image=align_center_icon,compound=tk.CENTER)
-Align_Center_btn.grid(row=0,column=8,padx=5)
-
-## Align Right Button
-Align_Right_btn=ttk.Button(tool_bar,image=align_right_icon,compound=tk.CENTER)
-Align_Right_btn.grid(row=0,column=9,padx=5)
-
-#------------------END of ToolBar-----------------------#
-
-#------------------Start of TextEditor------------------#
-
-text_editor=tk.Text(main_window)
-text_editor.config(wrap='word',relief=tk.FLAT) # whenever you are at last line of the editor then the whole word your are writing moves in newline
-
-## Scroll Bar
-scroll_bar=ttk.Scrollbar(main_window,orient='vertical')
-text_editor.focus_set() # this is to place cursor at fix point by default
-scroll_bar.pack(side=tk.RIGHT,fill=tk.Y)
-text_editor.pack(fill=tk.BOTH,expand=True)
-scroll_bar.config(command=text_editor.yview) # this is to link the text_editor and scroll bar
-text_editor.config(yscrollcommand=scroll_bar.set) # this is to tell that scroll bar will be vertical
-
-## Font Family and Font Size functionality
-def_font='Arial'
-def_size=12
-
-def font_changer(main_window): # we have pass an argument due to 'bind' function!!
-    global def_font ,def_size
-    def_font= font_family.get()
-    text_editor.configure(font=(def_font,def_size))
-
-def size_changer(event=None):  # It is not neccessary to write main_window as argument
-    global def_font ,def_size
-    def_size=size_var.get()
-    text_editor.configure(font=(def_font,def_size))
-
-font_box.bind('<<ComboboxSelected>>',font_changer) # this is to apply the fonts changed by the user on the text!!
-size_box.bind('<<ComboboxSelected>>',size_changer) # this is to apply the changed size given by the user on the text!!
-
-## Button Functionality
-print(tk.font.Font(font=text_editor['font']).actual()) # this will give the default text property of text_editor in dictionary format
-
-# Bold Button Functionality
-def change_bold():
-    text_property=tk.font.Font(font=text_editor['font'])
-    if text_property.actual()['weight']!='bold':
-        text_editor.configure(font=(def_font,def_size,'bold'))
-    else:
-        text_editor.configure(font=(def_font,def_size,'normal'))
-Bold_btn.config(command=change_bold)
-
-# Italic Button Functionality
-def change_italic():
-    text_property=tk.font.Font(font=text_editor['font'])
-    if text_property.actual()['slant']!='italic':
-        text_editor.configure(font=(def_font,def_size,'italic'))
-    else:
-        text_editor.configure(font=(def_font,def_size,'normal'))
-Italic_btn.config(command=change_italic)
-
-# Underline Button Functionality
-def change_underline():
-    text_property=tk.font.Font(font=text_editor['font'])
-    if text_property.actual()['underline']==0:
-        text_editor.configure(font=(def_font,def_size,'underline'))
-    else:
-        text_editor.configure(font=(def_font,def_size,'normal'))
-Underline_btn.config(command=change_underline)
-
-## Font color functionality
-def color_changer():
-    color_var=tk.colorchooser.askcolor() # this will create a window for user where he/she can pick the color
-    print(color_var) # this will print a tuple which contains--> ((R,G,B),hexadecimal_code)
-    text_editor.configure(fg=color_var[1]) # since the hexadecimal value of color is present at index '1'
-Font_Color_btn.config(command=color_changer)
-
-## Align Button Functionalities
-# Align Left 
-def align_left():
-    text_var=text_editor.get(1.0,'end') # this will take all the text from line one to the end !!
-    text_editor.tag_config('left',justify=tk.LEFT)
-    text_editor.delete(1.0,tk.END)
-    text_editor.insert(tk.INSERT,text_var,'left')
-Align_Left_btn.config(command=align_left)
-
-# Align Center
-def align_center():
-    text_var=text_editor.get(1.0,'end')
-    text_editor.tag_config('center',justify=tk.CENTER)
-    text_editor.delete(1.0,tk.END)
-    text_editor.insert(tk.INSERT,text_var,'center')
-Align_Center_btn.config(command=align_center)
-
-# Align Right
-def align_right():
-    text_var=text_editor.get(1.0,'end') 
-    text_editor.tag_config('right',justify=tk.RIGHT)
-    text_editor.delete(1.0,tk.END)
-    text_editor.insert(tk.INSERT,text_var,'right')
-Align_Right_btn.config(command=align_right)
-
-text_editor.configure(font=('Arial',12))
-
-#------------------END of TextEditor--------------------#
-
-#------------------Start of StatusBar-------------------#
-
-status_bar=ttk.Label(main_window,text='Status Bar')
-status_bar.pack(side=tk.BOTTOM)
-
-## character and word counter which will diplay on the status bar
+open_status_file=False
+tool_check=False
+status_check=False
+selected=False
 text_changed=False
-def changed(event=None):
-    global text_changed
-    if text_editor.edit_modified():
-        text_changed=True
-        word=len(text_editor.get(1.0,'end-1c').split(" ")) # "end-1c" will eliminate the count of '\n' 
-        char=len(text_editor.get(1.0,'end-1c'))
-        status_bar.config(text=f'Character: {char}    Words: {word}')
-    text_editor.edit_modified(False) # this is done to display the changes in words and character whenever user types something
-# if this statement is not included then it will only update the word and characters once and will show only '1'(char) and '1'(word)
+bg_col = ["#f38181", "#21094e", "#e4fbff", "#233e8b"]
+fg_col = ["#fce38a", "#a5e1ad", "#7868e6", "#ffffc7"]
 
-text_editor.bind('<<Modified>>',changed)
-
-#------------------END of StatusBar---------------------#
-
-#------------------Start of MainMenu Functionality------#
-
-### Global variable for the file path
-url=''
-
-## New functionality
-def new_file(event=None):
-    global url
-    url=''
-    text_editor.delete(1.0,tk.END)
-
-## Open Functionality
-def open_file(event=None):
-    global url
-    url=filedialog.askopenfilename(initialdir=os.getcwd(),title='Select File',filetype=(('Text File','*.txt'),('All Files','*.*')))
-    # this will open the window where user will select his/her file by default it will open the cwd and will give option to open text file
-    # as separate entity and all other files as another separate entity
-    try:
-        with open(url,'r') as rf:
-            text_editor.delete(1.0,tk.END)
-            text_editor.insert(1.0,rf.read())
-    except FileNotFoundError:
-        return
-    else:
-        messagebox.showinfo('Success!','File opened successfully')
-    main_window.title(os.path.basename(url)) # this will change the name of window as the opened file name
-
-## Save functionality
-def save_file(event=None):
-    global url
-    try:
-        if url: # if file already exists!!
-            content=str(text_editor.get(1.0,tk.END))
-            with open(url,'w',encoding='utf-8') as wf:
-                wf.write(content)
-        else: # if file doesnot exists!!
-            url=filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetype=(('Text File','*.txt'),('All Files','*.*')))    
-            content2=str(text_editor.get(1.0,tk.END))
-            url.write(content2)
-            url.close()
-    except Exception:
-        return
-
-## Save As functionality
-def save_as_file():
-    global url
-    try:
-        url=filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetype=(('Text File','*.txt'),('All Files','*.*')))    
-        content=str(text_editor.get(1.0,tk.END))
-        url.write(content)
-        url.close()
-    except Exception:
-        return
-
-## Exit functionality
-def exit_func(event=None):
-    global url,text_changed
-    try:
-        if text_changed:
-            mbox=messagebox.askyesnocancel('Warning!','Do you want to save the changes in your file?')
-            if mbox is True:
-                if url:
-                    content=str(text_editor.get(1.0,tk.END))
-                    with open(url,'w',encoding='utf-8') as wf:
-                        wf.write(content)
-                    main_window.destroy() # this will exit the window
-                else:
-                    content2=str(text_editor.get(1.0,tk.END))
-                    url=filedialog.asksaveasfile(mode='w',defaultextension='.txt',filetype=(('Text File','*.txt'),('All Files','*.*')))
-                    url.write(content2)
-                    url.close()
-                    main_window.destroy()
-            elif mbox is False:
-                main_window.destroy()
-            # we have written conditions like this so that when user presses the cancel button then the window should not get exited
-        else:
-            main_window.destroy() 
-    except Exception:
-        return
-### File commands
-# New 
-file.add_command(label='New',image=new_icon,compound=tk.LEFT,accelerator='Ctrl+N',command=new_file) # if we do not use this 'compound=tk.LEFT' then icon and Label will overlap each other!!
-# By the use of 'accelarator="Ctrl+N"' we can provide the text after the label
-# Open
-file.add_command(label='Open',image=open_icon,compound=tk.LEFT,accelerator='Ctrl+O',command=open_file)
-# Save
-file.add_command(label='Save',image=save_icon,compound=tk.LEFT,accelerator='Ctrl+S',command=save_file)
-# Save As
-file.add_command(label='Save As',image=save_as_icon,compound=tk.LEFT,accelerator='Ctrl+Alt+S',command=save_as_file)
-# Exit
-file.add_command(label='Exit',image=exit_icon,compound=tk.LEFT,accelerator='Ctrl+Q',command=exit_func)
-
-## Find Functionality
-def find_and_replace(event=None):
-    find=tk.Toplevel()
-    find.geometry('450x250+500+200') # the plus sign indicates we want to shift the window  
-    find.title('Find And Replace')
-    find.wm_iconbitmap('find.ico')
-    find.resizable(0,0) # this restricts the user to resize the window
-    
-    # LabelFrame
-    lab=ttk.Labelframe(find,text='Enter the Entries')
-    lab.pack(pady=20)
-    
-    # Labels
-    labf=ttk.Label(lab,text='Find: ')
-    labf.grid(row=0,column=0,padx=5,pady=5)
-    
-    labr=ttk.Label(lab,text='Replace: ')
-    labr.grid(row=3,column=0,padx=5,pady=5)
-
-    # Entry boxes
-    fi_var=tk.StringVar()
-    fi_entry=ttk.Entry(lab,width=25,textvariable=fi_var)
-    fi_entry.grid(row=1,column=0,padx=5,pady=5)
-
-    re_var=tk.StringVar()
-    re_entry=ttk.Entry(lab,width=25,textvariable=re_var)
-    re_entry.grid(row=4,column=0,padx=5,pady=5)
-
-    # Find Button
-    def find_func():
-        word=str(fi_var.get())
-        text_editor.tag_remove('match','1.0',tk.END)
+def myfind(text):
+    if text:
+        pos='1.0'
         matches=0
-        if word:
-            start_pos='1.0'
-            while True: # seaching for all matching string
-                start_pos=text_editor.search(word,start_pos,stopindex=tk.END) # seaching for matching string
-                if not start_pos:
-                    break
-                end_pos=f'{start_pos}+{len(word)}c' 
-                text_editor.tag_add('match',start_pos,end_pos) # adding the tag
-                matches+=1 # match count
-                start_pos=end_pos # updating the search range
-                text_editor.tag_config('match',foreground='red',background='yellow') # setting the display for matched items 
+        while True:
+            pos=my_text.search(text,pos,stopindex=END)
+            if not pos:
+                break
+            endpos=f"{pos}+{len(text)}c" # this will update the index of endpos properly if used without c at the end then it will give an error
+            my_text.tag_add("match",pos,endpos)
+            matches+=1
+            pos=endpos
+            my_text.tag_config("match",foreground="red",background="yellow")
+    messagebox.showinfo("Find Results",f"{matches} number of Entries found!")
+
+def myreplace(textf,textr):
+    chars=my_text.get(1.0,END)
+    char2=chars.replace(textf,textr)
+    print(char2)
+    my_text.delete(1.0,END)
+    my_text.insert(1.0,char2)
+    if char2 != chars:
+        messagebox.showinfo("Find And Replace","Text replaced Successfully!")
+    else:
+        messagebox.showinfo("Find And Replace","No Matches were found to replace your text")
+
+
+def find_and_replace():
+    win2=Toplevel()
+    win2.title("Find and Replace")
+    win2.iconbitmap("icons/find.ico")
+    win2.geometry("500x450")
+    win2.resizable(0,0)
+
+    # Find Section
+    find_label_frame=ttk.LabelFrame(win2,text="Find")
+    find_label_frame.pack(padx=20,pady=20)
+
+    find_label=ttk.Label(find_label_frame,text="Enter Your Keyword Here: ",font=("Helvetica",12))
+    find_label.grid(row=0,column=0,padx=20,pady=20)
+
+    find_entry=ttk.Entry(find_label_frame,font=("Helvetica",12))
+    find_entry.grid(row=0,column=1,pady=20,padx=(0,20))
+
+    find_button=ttk.Button(find_label_frame,text="Find",command=lambda:myfind(find_entry.get()))
+    find_button.grid(row=1,column=0,columnspan=2,padx=10,pady=10)
+
+    # Find and Replace Section
+    find_and_replace_label_frame=ttk.Labelframe(win2,text="Find and Replace")
+    find_and_replace_label_frame.pack(padx=20,pady=20)
+
+    find_and_replace_label1=ttk.Label(find_and_replace_label_frame,text="Enter Your Keyword Here: ",font=("Helvetica",12))
+    find_and_replace_label1.grid(row=0,column=0,padx=20,pady=20)
+
+    find_and_replace_entry1=ttk.Entry(find_and_replace_label_frame,font=("Helvetica",12))
+    find_and_replace_entry1.grid(row=0,column=1,padx=(0,20),pady=20)
+
+    find_and_replace_button1=ttk.Button(find_and_replace_label_frame,text="Find",command=lambda:myfind(find_and_replace_entry1.get()))
+    find_and_replace_button1.grid(row=1,column=0,columnspan=2,padx=10,pady=10)
+
+    find_and_replace_label2=ttk.Label(find_and_replace_label_frame,text="Enter Your Text to Replace: ",font=("Helvetica",12))
+    find_and_replace_label2.grid(row=2,column=0,padx=20,pady=20)
+
+    find_and_replace_entry2=ttk.Entry(find_and_replace_label_frame,font=("Helvetica",12))
+    find_and_replace_entry2.grid(row=2,column=1,padx=(0,20),pady=20)
+
+    find_and_replace_button2=ttk.Button(find_and_replace_label_frame,text="Replace",command=lambda:myreplace(find_and_replace_entry1.get(),find_and_replace_entry2.get()))
+    find_and_replace_button2.grid(row=3,column=0,columnspan=2,padx=10,pady=10)
+
+    win2.mainloop()
+
+def update_status(event):
+    global text_changed
+    if my_text.edit_modified():
+        chars=len(my_text.get(1.0,"end-1c"))
+        words=len(my_text.get(1.0,"end-1c").split(" "))
+        status_bar.config(text=f"Characters: {chars}  Words: {words}")
+        text_changed=True
+    my_text.edit_modified(False) # this line is required for updation in status bar
     
-    fi_btn=ttk.Button(lab,text='Find',compound=tk.CENTER,command=find_func)
-    fi_btn.grid(row=2,column=0,padx=10,pady=5)
+def about():
+    messagebox.showinfo("Kraber Text Editor","This is very cool text editor Enjoy!")
 
-    # Replace Button
-    def replace_func():
-        word=str(fi_var.get())
-        replace_text=str(re_var.get())
-        content=text_editor.get('1.0',tk.END)
-        new_content=content.replace(word,replace_text)
-        text_editor.delete('1.0',tk.END)
-        text_editor.insert('1.0',new_content)
+def new_file():
+    global open_status_file
+    open_status_file=False
+    # Deleting the previous content
+    my_text.delete(1.0,END)
+    # Changing the root title
+    root.title("Untitled -- Kraber Text Editor")
 
-    re_btn=ttk.Button(lab,text='Replace',compound=tk.CENTER,command=replace_func)
-    re_btn.grid(row=5,column=0,padx=10,pady=5)
+def open_file():
+    global open_status_file
+    file_name=filedialog.askopenfilename(initialdir=os.getcwd(),title="Choose a Text File",filetypes=(("Text Files","*.txt"),("Python Files","*.py"),("C++ Files","*.cpp"),("All Files","*.*")))
+    if file_name:
+        open_status_file=file_name
+        # Deleting the previous content
+        my_text.delete(1.0, END)
+        # Changing the root title
+        root.title(f"{os.path.basename(file_name)} -- Kraber Text Editor")
+        #opening the file, reading it's content and putting it into text box
+        with open(file_name,'r') as f:
+            my_text.insert(END,f.read())
+    
+def save_as():
+    global text_changed
+    # asking for file to get saved
+    file_name = filedialog.asksaveasfilename(initialdir=os.getcwd(), title="Save As", defaultextension=".*", filetypes=(("Text File", "*.txt"), ("Python File", "*.py"), ("C++ File", "*.cpp")))
+    if file_name:
+        text_changed=False
+        # Changing the root title
+        root.title(f"{os.path.basename(file_name)} -- Kraber Text Editor")
+        # Saving the file or writing the content into the file
+        with open(file_name,"w") as f:
+            f.write(my_text.get(1.0,END))
+        status_bar.config(text=f"{status_bar['text']}  -- saved ✓")
+        messagebox.showinfo("Save","Saved your file Successfully!")
 
-    find.mainloop()
-### Edit commands
-# Cut
-edit.add_command(label='Cut',image=cut_icon,compound=tk.LEFT,accelerator='Ctrl+X',command=lambda :text_editor.event_generate("<Control x>"))
-# Copy
-edit.add_command(label='Copy',image=copy_icon,compound=tk.LEFT,accelerator='Ctrl+C',command=lambda :text_editor.event_generate("<Control c>"))
-# Paste
-edit.add_command(label='Paste',image=paste_icon,compound=tk.LEFT,accelerator='Ctrl+V',command=lambda :text_editor.event_generate("<Control v>"))
-# Clear All
-edit.add_command(label='Clear All',image=clear_all_icon,compound=tk.LEFT,accelerator='Ctrl+Alt+C',command=lambda : text_editor.delete(1.0,tk.END))
-# Find
-edit.add_command(label='Find',image=find_icon,compound=tk.LEFT,accelerator='Ctrl+F',command=find_and_replace)
-
-### View commands
-show_toolbar=tk.BooleanVar()
-show_statusbar=tk.BooleanVar()
-show_toolbar.set(True)
-show_statusbar.set(True)
-
-def hide_toolbar():
-    global show_toolbar
-    if show_toolbar:
-        tool_bar.pack_forget() # it will remove the tool bar!!
-        show_toolbar=False
+def save():
+    global open_status_file,text_changed
+    text_changed=False
+    if open_status_file:
+        # Changing the root title
+        root.title(f"{os.path.basename(open_status_file)} -- Kraber Text Editor")
+        # Saving the file or writing the content into the file
+        with open(open_status_file, "w") as f:
+            f.write(my_text.get(1.0, END))
+        status_bar.config(text=f"{status_bar['text']}  -- saved ✓")
     else:
-        text_editor.pack_forget()
+        save_as()
+
+def cut(event):
+    global selected
+    if event:
+        selected=root.clipboard_get()
+    else:
+        if my_text.selection_get():
+            selected=my_text.selection_get()
+            my_text.delete("sel.first","sel.last")
+            root.clipboard_clear()
+            root.clipboard_append(selected)
+
+def copy(event):
+    global selected
+    if event:
+        selected=root.clipboard_get()
+    else:
+        if my_text.selection_get():
+            selected = my_text.selection_get()
+            root.clipboard_clear()
+            root.clipboard_append(selected)
+
+def paste(event):
+    global selected
+    if event:
+        selected=root.clipboard_get()
+    else:
+        if selected:
+            position=my_text.index(INSERT)
+            my_text.insert(position,selected)
+
+# Bold function
+def bold_it():
+    bold_font=font.Font(my_text,my_text.cget("font"))
+    bold_font.config(weight=font.BOLD)
+    
+    my_text.tag_configure("bold",font=bold_font)
+    curr_font=my_text.tag_names("sel.first")
+
+    if "bold" in curr_font:
+        my_text.tag_remove("bold","sel.first","sel.last")
+    else:
+        my_text.tag_add("bold","sel.first","sel.last")
+
+# Italic function
+def italic_it():
+    italic_font=font.Font(my_text,my_text.cget("font"))
+    italic_font.config(slant="italic")
+
+    my_text.tag_configure("italic",font=italic_font)
+    curr_font=my_text.tag_names("sel.first")
+
+    if "italic" in curr_font:
+        my_text.tag_remove("italic","sel.first","sel.last")
+    else:
+        my_text.tag_add("italic","sel.first","sel.last")
+
+# Underline function
+def underline_it():
+    underline_font=font.Font(my_text,my_text.cget("font"))
+    underline_font.config(underline=True)
+
+    my_text.tag_configure("underline",font=underline_font)
+    curr_font = my_text.tag_names("sel.first")
+
+    if "underline" in curr_font:
+        my_text.tag_remove("underline", "sel.first", "sel.last")
+    else:
+        my_text.tag_add("underline", "sel.first", "sel.last")
+
+# font color selected text
+def font_color_sel():
+    my_color = colorchooser.askcolor()[1]
+    if my_color:
+        try:
+            color_font=font.Font(my_text,my_text.cget("font"))
+            curr_color=my_text.tag_names("sel.first")
+
+            my_text.tag_configure("colored",foreground=my_color,font=color_font)
+            if "colored" in curr_color:
+                my_text.tag_remove("colored","sel.first","sel.last")
+            else:
+                my_text.tag_add("colored", "sel.first", "sel.last")
+       
+        except Exception:
+            my_text.configure(fg=my_color)
+
+# font color for all text
+def font_color():
+    my_color = colorchooser.askcolor()[1]
+    if my_color:
+        my_text.configure(fg=my_color)
+
+# background color
+def bg_color():
+    my_color = colorchooser.askcolor()[1]
+    if my_color:
+        my_text.configure(bg=my_color)
+
+def theme(e):
+    global bg_col,fg_col
+    my_text.configure(bg=bg_col[e],fg=fg_col[e])
+
+def font_changer(e):
+    new_font=font_style.get()
+    print(new_font)
+    my_text.configure(font=(new_font,font_size_box.get()))
+
+
+def show_status_bar():
+    global status_check
+    if status_check:
+        my_scrollx.pack_forget()
+        status_bar.pack()
+        my_scrollx.pack(fill=X,side=BOTTOM)
+        view_menu.entryconfigure(0, label=" Status Bar  ✓")
+        status_check=False
+    else:
         status_bar.pack_forget()
-        tool_bar.pack(side=tk.TOP,fill=tk.X)
-        text_editor.pack(fill=tk.BOTH,expand=True)
-        status_bar.pack(side=tk.BOTTOM)
-        show_toolbar=True
+        view_menu.entryconfigure(0,label=" Status Bar")
+        status_check=True
 
-def hide_statusbar():
-    global show_statusbar
-    if show_statusbar:
-        status_bar.pack_forget() # it will remove the status bar!!
-        show_statusbar=False
+def show_tool_bar():
+    global tool_check
+    if tool_check:
+        main_frame.pack_forget()
+        tool_bar.pack(fill=X, side=TOP)
+        main_frame.pack(fill=BOTH,expand=1)
+        view_menu.entryconfigure(1, label=" Tool Bar  ✓")
+        tool_check=False
     else:
-        status_bar.pack(side=tk.BOTTOM)
-        show_statusbar=True
+        tool_bar.pack_forget()
+        view_menu.entryconfigure(1,label=" Tool Bar")
+        tool_check=True
+    
+def clear_all():
+    my_text.delete(1.0,END)
+    update_status(1)
 
-# Tool Bar
-view.add_checkbutton(label='Tool Bar',onvalue=True,offvalue=0,variable=show_toolbar,image=tool_bar_icon,compound=tk.LEFT,command=hide_toolbar)
+def font_sizer(event):
+    my_text.configure(font=(font_style.get(),font_size_box.get()))
+
+def left_align():
+    content=my_text.get(1.0,"end")
+    my_text.delete(1.0, END)
+    my_text.tag_configure("left",justify=LEFT)
+    my_text.insert(INSERT,content,'left') # here INSERT specifies that our text will get inserted where the cursor is active
+
+def center_align():
+    content=my_text.get(1.0,END)
+    my_text.delete(1.0,END)
+    my_text.tag_configure("center",justify=CENTER)
+    my_text.insert(INSERT,content,'center')
+
+def right_align():
+    content=my_text.get(1.0,END)
+    my_text.delete(1.0,END)
+    my_text.tag_configure("right",justify=RIGHT)
+    my_text.insert(INSERT,content,'right')
+
+def myquit():
+    global text_changed
+    if text_changed:
+        response=messagebox.askyesnocancel("Exit","Do you want to save your file before quitting?")
+        if response==True:
+            save()
+            root.quit()
+        elif response==False:
+            root.quit()
+    else:
+        root.quit()
+
+#Importing images
+bold_img = PhotoImage(file="icons/bold.png")
+italic_img = PhotoImage(file="icons/italic.png")
+underline_img = PhotoImage(file="icons/underline.png")
+new_img=PhotoImage(file="icons/new.png")
+open_img=PhotoImage(file="icons/open.png")
+save_img=PhotoImage(file="icons/save.png")
+saveas_img=PhotoImage(file="icons/save_as.png")
+cut_img=PhotoImage(file="icons/cut.png")
+copy_img=PhotoImage(file="icons/copy.png")
+paste_img=PhotoImage(file="icons/paste.png")
+exit_img=PhotoImage(file="icons/exit.png")
+find_img=PhotoImage(file="icons/find.png")
+status_bar_img=PhotoImage(file="icons/status_bar.png")
+tool_bar_img=PhotoImage(file="icons/tool_bar.png")
+clear_all_img=PhotoImage(file="icons/clear_all.png")
+undo_img=PhotoImage(file="icons/undo.png")
+redo_img=PhotoImage(file="icons/redo.png")
+left_align_img=PhotoImage(file="icons/align_left.png")
+right_align_img=PhotoImage(file="icons/align_right.png")
+center_align_img=PhotoImage(file="icons/align_center.png")
+
+# Tool Bar Frame
+tool_bar=ttk.Frame(root)
+tool_bar.pack(fill=X,side=TOP)
+
+# font styles
+font_family=font.families()
+print(font_family)
+font_style = ttk.Combobox(tool_bar,values=font_family,width=30,state="readonly")
+font_style.set("Comic Sans MS")
+font_style.grid(row=0, column=0, padx=10, pady=3)
+
+# font size
+font_size=[i for i in range(1,101)]
+font_size_box=ttk.Combobox(tool_bar,values=font_size,width=4,state="readonly")
+font_size_box.set("14")
+font_size_box.grid(row=0,column=1,pady=3,padx=10)
+
+# Bold Button
+bold_btn=Button(tool_bar,image=bold_img,borderwidth=0,command=bold_it)
+bold_btn.grid(row=0,column=2,pady=3,padx=10)
+
+# Italic Button
+italic_btn=Button(tool_bar,image=italic_img,borderwidth=0,command=italic_it)
+italic_btn.grid(row=0, column=3,pady=3,padx=10)
+
+# Underline Button
+underline_btn = Button(tool_bar, image=underline_img, borderwidth=0,command=underline_it)
+underline_btn.grid(row=0, column=4, pady=3, padx=10)
+
+# Left align Button 
+left_align_btn = Button(tool_bar,image=left_align_img,borderwidth=0,command=left_align)
+left_align_btn.grid(row=0, column=5, pady=3, padx=10)
+
+# Center align Button
+center_align_btn = Button(tool_bar, image=center_align_img, borderwidth=0,command=center_align)
+center_align_btn.grid(row=0, column=6, pady=3, padx=10)
+
+# Right align Button
+right_align_btn = Button(tool_bar,image=right_align_img,borderwidth=0,command=right_align)
+right_align_btn.grid(row=0,column=7,pady=3,padx=(10,1330))
+
+# Main Frame
+main_frame=ttk.Frame(root)
+main_frame.pack(fill=BOTH)
+
+
+# Creating text area (wrap="none" means we can extend our words now horizontally also)
+my_text=Text(main_frame,height=27,width=200,font=("Comic Sans Ms",14),selectbackground="yellow",selectforeground="black",undo=True,wrap="none")
+
+#scroll frame
+scroll_frame=ttk.Frame(main_frame)
+
+my_scrolly=ttk.Scrollbar(main_frame,command=my_text.yview)
+my_scrollx=ttk.Scrollbar(scroll_frame,command=my_text.xview,orient=HORIZONTAL)
+my_text.configure(yscrollcommand=my_scrolly.set,xscrollcommand=my_scrollx.set)
+my_scrolly.pack(side=RIGHT,fill=Y)
+
 # Status Bar
-view.add_checkbutton(label='Status Bar',onvalue=1,offvalue=False,variable=show_statusbar,image=status_bar_icon,compound=tk.LEFT,command=hide_statusbar)
+status_frame=ttk.Frame(main_frame,borderwidth=0)
+status_frame.pack(fill=X, side=BOTTOM)
+status_bar=ttk.Label(status_frame,text="Status Bar")
+status_bar.pack(pady=(1,3))
 
-### Color theme commands
-def change_theme():
-    color=str(theme_choice.get())
-    color_tuple=color_dict.get(color)
-    fg_color,bg_color=color_tuple[0],color_tuple[1]
-    text_editor.config(fg=fg_color,bg=bg_color)
+my_scrollx.pack(fill=X)
+scroll_frame.pack(fill=X,side=BOTTOM)
+my_text.pack(fill=BOTH)
 
-counter=0
-for i in color_dict:
-    color_theme.add_radiobutton(label=i,image=color_icons[counter],variable=theme_choice,compound=tk.LEFT,command=change_theme)
-    counter+=1
+# Creating Menus
+my_menu=Menu(root,tearoff=0)
+root.config(menu=my_menu)
 
-#------------------END of MainMenu Functionality--------#
+# File Menu
+file_menu=Menu(my_menu,tearoff=0)
+my_menu.add_cascade(menu=file_menu,label="File")
+file_menu.add_command(image=new_img,command=new_file,label=" New",compound=LEFT)
+file_menu.add_command(label=" Open",command=open_file,image=open_img,compound=LEFT)
+file_menu.add_separator()
+file_menu.add_command(label=" Save",command=save,image=save_img,compound=LEFT)
+file_menu.add_command(label=" Save As",command=save_as,image=saveas_img,compound=LEFT)
+file_menu.add_separator()
+file_menu.add_command(label=" Exit",command=myquit,image=exit_img,compound=LEFT)
 
-main_window.config(menu=main_menu)
+#Edit Menu
+edit_menu=Menu(my_menu,tearoff=0)
+my_menu.add_cascade(label="Edit",menu=edit_menu)
+edit_menu.add_command(label=" Cut",command=lambda:cut(False),accelerator="Ctrl+X",image=cut_img,compound=LEFT)
+edit_menu.add_command(label=" Copy",command=lambda:copy(False),accelerator="Ctrl+C",image=copy_img,compound=LEFT)
+edit_menu.add_command(label=" Paste",command=lambda:paste(False),accelerator="Ctrl+V",image=paste_img,compound=LEFT)
+edit_menu.add_separator()
+edit_menu.add_command(label=" Undo",accelerator="Ctrl+Z",command=my_text.edit_undo,image=undo_img,compound=LEFT)
+edit_menu.add_command(label=" Redo",accelerator="Ctrl+Y",command=my_text.edit_redo,image=redo_img,compound=LEFT)
+edit_menu.add_separator()
+edit_menu.add_command(label=" Clear All",image=clear_all_img,compound=LEFT,command=clear_all)
+edit_menu.add_command(label=" Find and Replace",command=find_and_replace,image=find_img,compound=LEFT)
 
-### Adding shortcut keys
-main_window.bind('<Control-n>',new_file)
-main_window.bind('<Control-o>',open_file)
-main_window.bind('<Control-s>',save_file)
-main_window.bind('<Control-Alt-s>',save_as_file)
-main_window.bind('<Control-q>',exit_func)
-main_window.bind('<Control-f>',find_and_replace)
+# Color Menu
+color_menu=Menu(my_menu,tearoff=0)
+my_menu.add_cascade(label="Color",menu=color_menu)
+color_menu.add_command(label="Selected Text Color",command=font_color_sel)
+color_menu.add_command(label="All Text Color",command=font_color)
+color_menu.add_command(label="Background",command=bg_color)
+color_menu.add_separator()
+theme_menu=Menu(color_menu,tearoff=0)
+color_menu.add_cascade(label="Theme",menu=theme_menu)
+theme_menu.add_command(label="Cool Red",command=lambda:theme(0))
+theme_menu.add_command(label="Dark",command=lambda:theme(1))
+theme_menu.add_command(label="Light", command=lambda: theme(2))
+theme_menu.add_command(label="Cool Blue", command=lambda: theme(3))
 
-main_window.mainloop()
+# View Menu
+view_menu=Menu(my_menu,tearoff=0)
+my_menu.add_cascade(menu=view_menu,label="View")
+view_menu.add_command(label=" Status Bar   ✓",command=show_status_bar,image=status_bar_img,compound=LEFT)
+view_menu.add_command(label=" Tool Bar     ✓",command=show_tool_bar,image=tool_bar_img,compound=LEFT)
+
+# Help Menu
+help_menu=Menu(my_menu,tearoff=0)
+my_menu.add_cascade(label="Help",menu=help_menu)
+help_menu.add_command(label="About",command=about)
+
+# Bindings to the function
+my_text.bind("<<Modified>>",update_status)
+root.bind("<Control-Key-x>",cut)
+root.bind("<Control-Key-c>",copy)
+root.bind("<Control-Key-v>",paste)
+font_style.bind("<<ComboboxSelected>>",font_changer)
+font_size_box.bind("<<ComboboxSelected>>",font_sizer)
+
+root.mainloop()
