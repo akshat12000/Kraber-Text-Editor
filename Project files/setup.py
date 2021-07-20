@@ -14,7 +14,7 @@ executables = [cx_Freeze.Executable("texteditor.py", base=base, icon="myicon.ico
 
 cx_Freeze.setup(
     name = "Kraber Text Editor",
-    options = {"build_exe": {"packages":["tkinter","os"], "include_files":["myicon.ico",'tcl86t.dll','tk86t.dll', 'icons2']}},
+    options = {"build_exe": {"packages":["tkinter","os"], "include_files":["myicon.ico",'tcl86t.dll','tk86t.dll', 'icons']}},
     version = "0.01",
     description = "Tkinter Application",
     executables = executables
